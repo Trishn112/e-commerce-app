@@ -38,6 +38,7 @@ class AuthService {
           'name': name,
           'phoneNumber': phoneNumber,
           'role': role,
+          'profilePic': '', // Initialized empty for future updates
           'balance': 0.0,
           'createdAt': FieldValue.serverTimestamp(),
         });
@@ -50,7 +51,6 @@ class AuthService {
   }
 
   // --- 2. PHONE VERIFICATION (SMS OTP) ---
-  // On Chrome, this will trigger a reCAPTCHA window automatically
   Future<void> verifyPhone({
     required String phoneNumber,
     required Function(String) onCodeSent,
@@ -99,8 +99,6 @@ class AuthService {
   // --- 4. APPLE LOGIN (WEB-COMPILER SAFE) ---
   Future<UserCredential?> signInWithApple(String role) async {
     try {
-      // We pass an empty list for scopes here to avoid the 
-      // 'AppleIDAuthorizationScope' compiler error on Chrome/Web.
       final appleIdCredential = await SignInWithApple.getAppleIDCredential(
         scopes: [], 
       );
@@ -124,17 +122,39 @@ class AuthService {
   Future<void> _syncSocialUser(User? user, String role) async {
     if (user != null) {
       final userDoc = await _db.collection('users').doc(user.uid).get();
-      // Only create a new doc if the user doesn't already exist in Firestore
+      
+      // If user doesn't exist, create profile with profilePic field
       if (!userDoc.exists) {
         await _db.collection('users').doc(user.uid).set({
           'uid': user.uid,
           'email': user.email,
           'name': user.displayName ?? "Premium User",
+          'profilePic': user.photoURL ?? '', // Use Google/Apple photo if available
           'role': role,
           'balance': 0.0,
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
+    }
+  }
+
+  // --- 6. UPDATE PROFILE SETTINGS ---
+  // Call this method from your Settings screen to update name or photo
+  Future<bool> updateProfile({String? newName, String? newPhotoUrl}) async {
+    try {
+      String uid = _auth.currentUser!.uid;
+      Map<String, dynamic> data = {};
+      
+      if (newName != null) data['name'] = newName;
+      if (newPhotoUrl != null) data['profilePic'] = newPhotoUrl;
+
+      if (data.isNotEmpty) {
+        await _db.collection('users').doc(uid).update(data);
+      }
+      return true;
+    } catch (e) {
+      debugPrint("Update Profile Error: $e");
+      return false;
     }
   }
 

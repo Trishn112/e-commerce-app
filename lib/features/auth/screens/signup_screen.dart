@@ -21,6 +21,15 @@ class _SignupScreenState extends State<SignupScreen> {
   bool _isLoading = false;
   String _selectedRole = 'customer'; 
 
+  // Helper function to auto-correct name (e.g., "trish n" -> "Trish N")
+  String _formatName(String name) {
+    if (name.isEmpty) return "";
+    return name.trim().split(' ').map((word) {
+      if (word.isEmpty) return "";
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
+  }
+
   void _handleSignup() async {
     final name = _nameController.text.trim();
     final phone = _phoneController.text.trim();
@@ -28,6 +37,7 @@ class _SignupScreenState extends State<SignupScreen> {
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
+    // Validation
     if (name.isEmpty || phone.isEmpty || email.isEmpty || password.isEmpty) {
       _showError("Please fill in all fields");
       return;
@@ -40,12 +50,14 @@ class _SignupScreenState extends State<SignupScreen> {
 
     setState(() => _isLoading = true);
 
-    // FIXED: Now passing all 5 required parameters
+    // Auto-correcting the name before sending to AuthService
+    final formattedName = _formatName(name);
+
     final user = await _authService.signUp(
       email: email, 
       password: password, 
       role: _selectedRole,
-      name: name,
+      name: formattedName,
       phoneNumber: phone,
     );
 
@@ -148,14 +160,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
                 const SizedBox(height: 30),
                 
-                // SIGN UP BUTTON
                 _buildSignUpButton(),
 
                 const SizedBox(height: 20),
                 const Center(child: Text("OR", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold))),
                 const SizedBox(height: 20),
 
-                // SOCIAL LOGINS
                 _buildSocialLogins(),
 
                 const SizedBox(height: 24),
