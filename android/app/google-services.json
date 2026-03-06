@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1009643680241",
+    "project_id": "shop-future",
+    "storage_bucket": "shop-future.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009643680241:android:1ed0cd9bb63a07e04e1450",
+        "android_client_info": {
+          "package_name": "com.example.premium_store"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBquHyc_2mXWnCc73YhgSwS8fg2hqI96pI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
